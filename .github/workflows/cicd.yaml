@@ -1,0 +1,50 @@
+# .github/workflows/ci-cd-pipeline.yml
+
+name: CI/CD Pipeline
+
+# Define when this workflow should run
+on:
+  push:    # Runs on every push to the repository
+    branches:
+      - master    # You can replace 'main' with your default branch
+  pull_request: # Runs on pull requests to the repository
+
+# Define the jobs within the workflow
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest  # You can specify different environments like macOS, Windows, etc.
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3   # Step to check out the code in the repository
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'        # Define the version of Node.js (or any language/runtime you are using)
+
+      - name: Install dependencies
+        run: npm install            # Run commands to install project dependencies (you can replace with your build tools)
+
+      - name: Run tests
+        run: npm test               # Run the test suite (customize as per your project)
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-test            # Run deploy only if build-and-test job succeeds
+    if: github.ref == 'refs/heads/master'  # Only deploy on the main branch
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Build project
+        run: npm run build           # Run build command (customize as per your project)
+
+      - name: Deploy to Server
+        run: echo "Deployment Step"  # This step should include commands or actions to deploy your project (e.g., using scp, rsync, or cloud services)
